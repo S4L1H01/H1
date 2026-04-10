@@ -48,7 +48,7 @@ function launchRace() {
     localStorage.setItem('h1_balance', myBalance);
     
     const audio = document.getElementById('race-sound');
-    audio.volume = 0.2;
+    audio.volume = 0.2; // Ses seviyesi kısıldı
     audio.play().catch(e => console.log("Ses çalınamadı:", e));
 
     runRaceEngine(bet);
@@ -60,28 +60,28 @@ function runRaceEngine(bet) {
     lanes.forEach(l => l.innerHTML = ''); 
     
     let results = [];
-    const CHEAT_CODE = 8731; // Gizli Bahis Kodu [cite: 2026-04-10]
+    const CHEAT_CODES = [8731, 4431]; // Gizli Bahis Kodları [cite: 2026-04-10]
 
     ALL_BUGS.forEach((bug) => {
         let time;
 
-        // 1. Durum: RED ROACH Her Zaman Kaybeder [cite: 2026-04-10]
+        // 1. Durum: RED ROACH Her Zaman Kaybeder (Hile kodları olsa bile) [cite: 2026-04-10]
         if(bug.name === "RED ROACH") {
-            time = (Math.random() * 2 + 13).toFixed(3); // En yavaş (13+ sn)
+            time = (Math.random() * 2 + 13.5).toFixed(3); // En yavaş
         } 
-        // 2. Durum: 8731 Basıldıysa ve Red Roach değilse kazandır [cite: 2026-04-10]
-        else if(bet === CHEAT_CODE && bug.name === selectedBug) {
-            time = (Math.random() * 0.2 + 6.0).toFixed(3); // En hızlı (6.0 - 6.2 sn)
+        // 2. Durum: Hile kodlarından biri basıldıysa ve Red Roach değilse kazandır [cite: 2026-04-10]
+        else if(CHEAT_CODES.includes(bet) && bug.name === selectedBug) {
+            time = (Math.random() * 0.2 + 6.2).toFixed(3); // En hızlı
         }
         // 3. Durum: Normal Yarışçılar
         else {
-            time = (Math.random() * 4 + 7.5).toFixed(3); // Normal hız (7.5 - 11.5 sn)
+            time = (Math.random() * 4 + 7.8).toFixed(3); // Normal hız
         }
         
         results.push({ name: bug.name, img: bug.img, time: parseFloat(time) });
     });
 
-    // Animasyonu Başlat (Aşağıdan Yukarı)
+    // Animasyonu Başlat (Aşağıdan Yukarı) [cite: 2026-04-10]
     results.forEach((racer, i) => {
         const img = document.createElement('img');
         img.src = racer.img;
