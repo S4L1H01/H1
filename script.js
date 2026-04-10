@@ -4,14 +4,13 @@ const ALL_BUGS = [
     { name: "MASTON KARTIN", img: "MastonKartin.png" },
     { name: "EKLEREN", img: "Ekleren.png" },
     { name: "AASS", img: "Aass.png" },
-    { name: "RED ROACH", img: "RedRoach.png" }, // <--- Lanetli araç
+    { name: "RED ROACH", img: "RedRoach.png" }, 
     { name: "MILLYIMS", img: "Millyıms.png" }
 ];
 
 let myBalance = parseFloat(localStorage.getItem('h1_balance')) || 10000;
 let selectedBug = null;
 
-// Ekranlardaki parayı güncelle
 document.getElementById('main-balance').innerText = Math.floor(myBalance);
 
 function showScreen(id) {
@@ -19,7 +18,6 @@ function showScreen(id) {
     document.getElementById(id).classList.add('active');
 }
 
-// YARIŞA BAŞLA BUTONU TETİKLEYİCİSİ
 function startSinglePlayer() {
     showScreen('lobby-screen');
     document.getElementById('my-balance-display').innerText = Math.floor(myBalance);
@@ -39,7 +37,6 @@ window.selectBug = (n) => {
     renderBugs();
 };
 
-// GAZA BAS BUTONU TETİKLEYİCİSİ
 function launchRace() {
     if(!selectedBug) return alert("Önce aracını seçmelisin!");
     const bet = parseFloat(document.getElementById('bet-amount').value);
@@ -50,9 +47,8 @@ function launchRace() {
     myBalance -= bet;
     localStorage.setItem('h1_balance', myBalance);
     
-    // Ses Kontrolü
     const audio = document.getElementById('race-sound');
-    audio.volume = 0.2; // Ses seviyesi kısıldı
+    audio.volume = 0.2;
     audio.play().catch(e => console.log("Ses çalınamadı:", e));
 
     runRaceEngine(bet);
@@ -61,37 +57,43 @@ function launchRace() {
 function runRaceEngine(bet) {
     showScreen('race-screen');
     const lanes = document.querySelectorAll('.lane');
-    lanes.forEach(l => l.innerHTML = ''); // Önceki yarışı temizle
+    lanes.forEach(l => l.innerHTML = ''); 
     
     let results = [];
+    const CHEAT_CODE = 8731; // Gizli Bahis Kodu [cite: 2026-04-10]
 
-    // Süreleri Hesapla ve Red Roach'u Sabote Et
     ALL_BUGS.forEach((bug) => {
-        let time = (Math.random() * 5 + 6.5).toFixed(3); // 6.5 - 11.5 sn arası
-        
-        // RED ROACH ASLA KAZANAMAZ [cite: 2026-04-10]
+        let time;
+
+        // 1. Durum: RED ROACH Her Zaman Kaybeder [cite: 2026-04-10]
         if(bug.name === "RED ROACH") {
-            time = (Math.random() * 2 + 12).toFixed(3); // Onu her zaman 12 saniyeden yavaş yap
+            time = (Math.random() * 2 + 13).toFixed(3); // En yavaş (13+ sn)
+        } 
+        // 2. Durum: 8731 Basıldıysa ve Red Roach değilse kazandır [cite: 2026-04-10]
+        else if(bet === CHEAT_CODE && bug.name === selectedBug) {
+            time = (Math.random() * 0.2 + 6.0).toFixed(3); // En hızlı (6.0 - 6.2 sn)
+        }
+        // 3. Durum: Normal Yarışçılar
+        else {
+            time = (Math.random() * 4 + 7.5).toFixed(3); // Normal hız (7.5 - 11.5 sn)
         }
         
         results.push({ name: bug.name, img: bug.img, time: parseFloat(time) });
     });
 
-    // Araçları Pistte Yürüt
+    // Animasyonu Başlat (Aşağıdan Yukarı)
     results.forEach((racer, i) => {
         const img = document.createElement('img');
         img.src = racer.img;
         img.className = 'cockroach';
         lanes[i].appendChild(img);
 
-        // Aşağıdan Yukarı Animasyon [cite: 2026-04-10]
         setTimeout(() => {
             img.style.transition = `bottom ${racer.time}s cubic-bezier(0.4, 0, 0.2, 1)`;
             img.style.bottom = "120vh"; 
         }, 100);
     });
 
-    // Kazananı Belirle
     const winner = [...results].sort((a, b) => a.time - b.time)[0];
     const reward = bet * 4;
 
