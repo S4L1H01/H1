@@ -3,7 +3,7 @@ const VEHICLE_DATA = [
     { name: "MASTON KARTIN", img: "MastonKartin.png" },
     { name: "EKLEREN", img: "Ekleren.png" },
     { name: "AASS", img: "Aass.png" },
-    { name: "RED ROACH", img: "RedRoach.png" },
+    { name: "RED ROACH", img: "RedRoach.png" }, // <--- Lanetli Araç
     { name: "MILLYIMS", img: "Millyıms.png" }
 ];
 
@@ -61,37 +61,59 @@ function startRaceCore(bet) {
     const lanes = document.querySelectorAll('.lane');
     let raceStats = [];
 
-    VEHICLE_DATA.forEach((car, index) => {
-        const sprite = document.createElement('img');
-        sprite.src = car.img;
-        sprite.className = 'racer-sprite';
-        lanes[index].appendChild(sprite);
-
+    // 1. ADIM: Başlangıç Sürelerini Ata [cite: 2026-04-10]
+    VEHICLE_DATA.forEach((car) => {
         // Algoritma: 6.5 - 11.5 saniye arası rastgele bitiş
         const duration = (Math.random() * 5 + 6.5).toFixed(3);
         raceStats.push({ name: car.name, img: car.img, time: parseFloat(duration) });
+    });
+
+    // 2. ADIM: RED ROACH SABOTAJI (Kritik Bölge) [cite: 2026-04-10]
+    const redRoachIndex = raceStats.findIndex(car => car.name === "RED ROACH");
+    
+    // Geçici olarak kazananı bul
+    const tempWinner = [...raceStats].sort((a, b) => a.time - b.time);
+
+    // Eğer kazanan Red Roach ise, süresini sabote et ve onu sonuncu yap [cite: 2026-04-10]
+    if (tempWinner.name === "RED ROACH") {
+        console.log("⚠️ Sabotaj Devrede: Red Roach'un birinciliği engellendi.");
+        
+        // Diğer en yavaş aracın süresini bul
+        const slowestTime = [...raceStats].sort((a, b) => b.time - a.time).time;
+        
+        // Red Roach'u ondan bile daha yavaş yap (örn: 2 saniye daha yavaş) [cite: 2026-04-10]
+        raceStats.time = slowestTime + 2.0; 
+    }
+
+    // 3. ADIM: Animasyonları Başlat [cite: 2026-04-10]
+    raceStats.forEach((carStats, index) => {
+        const lanes = document.querySelectorAll('.lane');
+        const sprite = document.createElement('img');
+        sprite.src = carStats.img;
+        sprite.className = 'racer-sprite';
+        lanes.appendChild(sprite);
 
         setTimeout(() => {
-            sprite.style.transition = `top ${duration}s cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
+            sprite.style.transition = `top ${carStats.time}s cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
             sprite.style.top = "110vh";
         }, 100);
     });
 
-    // Kazananı Hesapla
-    const winner = raceStats.sort((a, b) => a.time - b.time)[0];
-    const winMultiplier = 5; // 6 kulvarlı yarışta 5 katı kazanç
+    // 4. ADIM: Gerçek Kazananı Hesapla ve Göster [cite: 2026-04-10]
+    const finalWinner = [...raceStats].sort((a, b) => a.time - b.time);
+    const winMultiplier = 5; 
 
     setTimeout(() => {
-        const isUserWinner = (winner.name === userSelection);
+        const isUserWinner = (finalWinner.name === userSelection);
         if (isUserWinner) {
             const reward = bet * winMultiplier;
             myBalance += reward;
             saveBalance();
-            displayResults(winner, reward, true);
+            displayResults(finalWinner, reward, true);
         } else {
-            displayResults(winner, 0, false);
+            displayResults(finalWinner, 0, false);
         }
-    }, winner.time * 1000);
+    }, finalWinner.time * 1000);
 }
 
 function displayResults(winner, cash, isWin) {
@@ -109,7 +131,7 @@ function displayResults(winner, cash, isWin) {
     } else {
         statusText.textContent = "KAYBETTİN";
         statusText.style.color = "var(--red)";
-        infoText.textContent = "BAHİS BOŞA GİTTİ, ARAÇ YOLDA KALDI";
+        infoText.textContent = `${winner.name} KAZANDI, BAHİS BOŞA GİTTİ`;
     }
 }
 

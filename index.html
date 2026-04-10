@@ -2,62 +2,50 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>H1 — HAMAM YARIŞI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>H1 - Hamam Yarışı</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <audio id="race-sound" src="h1ses.mp3" preload="auto"></audio>
 
     <div id="main-menu" class="screen active">
-        <div class="overlay-fx"></div>
-        <div class="container">
-            <h1 class="logo">H1</h1>
-            <p class="tagline">UNDERGROUND RACE CIRCUIT</p>
-            <div class="menu-actions">
-                <button class="btn-primary" onclick="initSinglePlayer()">YARIŞA BAŞLA</button>
-                <div class="stat-box">BAKİYE: <span id="main-balance-val">10000</span> YDL</div>
-            </div>
+        <h1 class="logo">H1</h1>
+        <div class="menu-btns">
+            <button class="glow-btn" onclick="startSinglePlayer()">YARIŞA BAŞLA</button>
+            <div class="balance-main">BAKİYE: <span id="main-balance">10000</span> YDL</div>
         </div>
     </div>
 
-    <div id="garage-screen" class="screen">
-        <div class="header-bar">
-            <div class="balance-pill">CÜZDAN: <span id="garage-balance-val">10000</span> YDL</div>
+    <div id="lobby-screen" class="screen">
+        <div class="header">
+            <div class="balance">BAKİYE: <span id="my-balance-display">10000</span> YDL</div>
         </div>
-        <div class="selection-container">
-            <h2 class="title-flicker">ARACINI SEÇ</h2>
-            <div id="vehicle-grid" class="vehicle-grid"></div>
-            
-            <div class="bet-input-wrap">
-                <div class="input-group">
-                    <label>YATIRILACAK BAHİS (YDL)</label>
-                    <input type="number" id="bet-field" value="500" min="100" step="100">
-                </div>
-                <button id="start-btn" class="btn-launch" onclick="launchSequence()">GAZA BAS!</button>
-            </div>
+        <h2 class="sub-title">ARACINI SEÇ</h2>
+        <div id="bug-grid" class="selection-grid"></div>
+        <div class="bet-section">
+            <input type="number" id="bet-amount" value="500" min="100">
+            <button id="ready-btn" class="glow-btn" onclick="launchRace()">GAZA BAS!</button>
         </div>
     </div>
 
-    <div id="race-track-screen" class="screen">
-        <div class="track-environment">
-            <div class="track-lanes" id="lanes-container">
+    <div id="race-screen" class="screen">
+        <div class="track-wrapper">
+            <div class="track">
                 <div class="lane"></div><div class="lane"></div><div class="lane"></div>
                 <div class="lane"></div><div class="lane"></div><div class="lane"></div>
             </div>
         </div>
     </div>
 
-    <div id="result-screen" class="screen">
-        <div class="result-box">
-            <h1 id="race-outcome">SONUÇ</h1>
-            <div class="winner-display">
-                <img id="winner-image" src="" alt="Champion">
-                <h2 id="winner-car-name">---</h2>
-            </div>
-            <p id="payout-info"></p>
-            <button class="btn-reset" onclick="resetToMenu()">MENÜYE DÖN</button>
+    <div id="winner-screen" class="screen">
+        <h1 id="win-status">ŞAMPİYON</h1>
+        <div class="winner-card">
+            <img id="win-img" src="">
+            <h2 id="win-name"></h2>
         </div>
+        <p id="profit-info"></p>
+        <button class="glow-btn" onclick="location.reload()">TEKRAR DENE</button>
     </div>
 
     <script src="script.js"></script>
