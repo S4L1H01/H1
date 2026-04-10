@@ -840,6 +840,20 @@ body {
     border-color: var(--border);
 }
 
+.multi-error {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--red);
+    border: 1px solid var(--red);
+    background: rgba(255,26,60,0.08);
+    padding: 10px 16px;
+    letter-spacing: 1px;
+    width: 100%;
+    max-width: 560px;
+    text-align: center;
+    margin-top: 4px;
+}
+
 /* ANIMATIONS */
 @keyframes slideIn {
     from { transform: translateY(30px); opacity: 0; }

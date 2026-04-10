@@ -55,7 +55,7 @@
     <div class="menu-inner">
         <div class="section-title">ONLINE MODU</div>
         <div class="multi-grid">
-            <div class="multi-card" onclick="createLobby()">
+            <div class="multi-card" id="create-lobby-card" onclick="createLobby(this)">
                 <div class="mc-icon">⊕</div>
                 <div class="mc-title">LOBİ OLUŞTUR</div>
                 <div class="mc-desc">4 haneli kod al, arkadaşını davet et</div>
@@ -71,10 +71,8 @@
                 </div>
             </div>
         </div>
+        <div id="multi-error" class="multi-error" style="display:none"></div>
     </div>
-</div>
-
-<!-- LOBBY SCREEN -->
 <div id="lobby-screen" class="screen">
     <div class="scanlines"></div>
     <div class="lobby-topbar">
