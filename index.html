@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>H1 - Cockroach Racing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="lobby-screen">
+        <h1>H1 RACING - ARAÇ SEÇİMİ</h1>
+        <p>YARIŞ İÇİN 4 ARAÇ SEÇİLMELİ</p>
+        <div id="bug-grid" class="bug-grid"></div>
+    </div>
+
+    <div id="race-screen">
+        <div class="track">
+            <div id="lane-0" class="lane"></div>
+            <div id="lane-1" class="lane"></div>
+            <div id="lane-2" class="lane"></div>
+            <div id="lane-3" class="lane"></div>
+        </div>
+    </div>
+
+    <div id="winner-screen">
+        <img id="win-img" class="winner-glow" src="">
+        <h2 id="win-name" class="winner-name"></h2>
+        <button onclick="location.reload()" style="margin-top:30px; padding:10px 30px; cursor:pointer;">YENİ YARIŞ</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
