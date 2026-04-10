@@ -1,4 +1,3 @@
-// [cite: 2026-04-10]
 const ALL_BUGS = [
     { name: "MERRARI", img: "Merrari.png" },
     { name: "MASTON KARTIN", img: "MastonKartin.png" },
@@ -11,6 +10,7 @@ const ALL_BUGS = [
 let myBalance = parseFloat(localStorage.getItem('h1_balance')) || 10000;
 let selectedBug = null;
 
+// İlk açılışta bakiye yazdır
 document.getElementById('main-balance').innerText = Math.floor(myBalance);
 
 function showScreen(id) {
@@ -35,13 +35,19 @@ function renderBugs() {
 window.selectBug = (n) => { selectedBug = n; renderBugs(); };
 
 function launchRace() {
-    const bet = parseFloat(document.getElementById('bet-amount').value);
-    if(!selectedBug || bet > myBalance || bet <= 0) return alert("Seçim veya Bakiye geçersiz!");
+    const betInput = document.getElementById('bet-amount');
+    const bet = parseFloat(betInput.value);
+    
+    if(!selectedBug) return alert("ARACINI SEÇ!");
+    if(bet > myBalance) return alert("YETERSİZ BAKİYE!");
+    if(bet <= 0) return alert("GEÇERSİZ BAHİS!");
 
     myBalance -= bet;
     localStorage.setItem('h1_balance', myBalance);
-    document.getElementById('race-sound').volume = 0.2;
-    document.getElementById('race-sound').play();
+    
+    const audio = document.getElementById('race-sound');
+    audio.volume = 0.2;
+    audio.play().catch(() => {});
 
     runRaceEngine(bet);
 }
@@ -52,17 +58,19 @@ function runRaceEngine(bet) {
     lanes.forEach(l => l.innerHTML = ''); 
     
     const CHEAT_CODES = [8731, 4431];
-    let racers = ALL_BUGS.map((bug, i) => {
-        // Her araç için nadir bir "şanssızlık" ihtimali (Baya nadir) [cite: 2026-04-10]
-        const hasBadLuck = Math.random() < 0.08; 
+    
+    let racers = ALL_BUGS.map((bug) => {
+        // NADİR OLAY: %5 ihtimalle motor arızası [cite: 2026-04-10]
+        const hasBadLuck = Math.random() < 0.05; 
         
         return {
             ...bug,
-            pos: -10,
-            speed: 0.4 + (Math.random() * 0.3),
+            pos: -5,
+            // Hızları artırdık (0.8 - 1.2 arası), yarış seri bitsin diye
+            speed: 0.8 + (Math.random() * 0.4), 
             finished: false,
             element: null,
-            badLuckZone: hasBadLuck ? (40 + Math.random() * 30) : null,
+            badLuckZone: hasBadLuck ? (30 + Math.random() * 40) : null,
             isHacked: (CHEAT_CODES.includes(bet) && bug.name === selectedBug)
         };
     });
@@ -80,28 +88,26 @@ function runRaceEngine(bet) {
         let allFinished = true;
 
         racers.forEach(r => {
-            if (r.pos < 115) {
+            if (r.pos < 100) { // Araç ekran tepesine gelince durur [cite: 2026-04-10]
                 allFinished = false;
+                let step = r.speed;
 
-                // NORMAL HIZLANMA [cite: 2026-04-10]
-                let currentStep = r.speed;
-
-                // NADİR OLAY: Motor Teklemesi
-                if (r.badLuckZone && r.pos > r.badLuckZone && r.pos < r.badLuckZone + 10) {
-                    currentStep *= 0.3; // Sadece o bölgede yavaşlar
+                // Nadir Şanssızlık (Motor Teklemesi)
+                if (r.badLuckZone && r.pos > r.badLuckZone && r.pos < r.badLuckZone + 7) {
+                    step *= 0.25;
                 }
 
-                // RED ROACH SABOTAJI: Sona gelince nefesi kesilir [cite: 2026-04-10]
-                if (r.name === "RED ROACH" && r.pos > 92) {
-                    currentStep *= 0.15;
+                // RED ROACH SABOTAJI: Sona gelince hızı çakılır [cite: 2026-04-10]
+                if (r.name === "RED ROACH" && r.pos > 88) {
+                    step *= 0.1;
                 }
 
-                // HİLE KODU: Sona doğru atağa kalk
-                if (r.isHacked && r.pos > 70) {
-                    currentStep *= 2.5;
+                // HİLE KODU: Sona doğru %200 performans
+                if (r.isHacked && r.pos > 65) {
+                    step *= 2.2;
                 }
 
-                r.pos += currentStep;
+                r.pos += step;
                 r.element.style.bottom = r.pos + "%";
             } else if (!r.finished) {
                 r.finished = true;
@@ -109,18 +115,22 @@ function runRaceEngine(bet) {
             }
         });
 
+        // Tüm araçlar çizgiyi geçtiği an beklemeden bitir [cite: 2026-04-10]
         if (allFinished) {
             clearInterval(raceInterval);
             const winner = racers.sort((a, b) => a.finishTime - b.finishTime)[0];
-            const reward = bet * 1.5;
+            const reward = bet * 1.5; // Kazanç çarpanı: 0.50 kat fazlası [cite: 2026-04-10]
 
             setTimeout(() => {
                 const isWin = (winner.name === selectedBug);
-                if(isWin) { myBalance += reward; localStorage.setItem('h1_balance', myBalance); }
+                if(isWin) { 
+                    myBalance += reward; 
+                    localStorage.setItem('h1_balance', myBalance); 
+                }
                 displayResults(winner, reward, isWin);
-            }, 600);
+            }, 400);
         }
-    }, 40);
+    }, 35);
 }
 
 function displayResults(w, reward, isWin) {
