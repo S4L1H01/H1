@@ -4,28 +4,47 @@
     <meta charset="UTF-8">
     <title>H1 - Cockroach Racing</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-    <div id="lobby-screen">
-        <h1>H1 RACING - ARAÇ SEÇİMİ</h1>
-        <p>YARIŞ İÇİN 4 ARAÇ SEÇİLMELİ</p>
-        <div id="bug-grid" class="bug-grid"></div>
-    </div>
-
-    <div id="race-screen">
-        <div class="track">
-            <div id="lane-0" class="lane"></div>
-            <div id="lane-1" class="lane"></div>
-            <div id="lane-2" class="lane"></div>
-            <div id="lane-3" class="lane"></div>
+    <div id="start-screen" class="dilbozun-ui">
+        <h1>H1</h1>
+        <p>WASTE YOUR YDL ON THE TRACK</p>
+        <div class="main-btns">
+            <input type="text" id="lobby-input" placeholder="ROOM CODE" maxlength="5">
+            <button class="d-btn" onclick="joinOrCreateLobby()">ENTER THE PIT</button>
         </div>
     </div>
 
-    <div id="winner-screen">
-        <img id="win-img" class="winner-glow" src="">
-        <h2 id="win-name" class="winner-name"></h2>
-        <button onclick="location.reload()" style="margin-top:30px; padding:10px 30px; cursor:pointer;">YENİ YARIŞ</button>
+    <div id="lobby-screen" style="display:none;">
+        <div class="room-header">
+            <div class="room-code">ROOM: <span id="room-code-display">----</span></div>
+            <div class="balance-info">BALANCE: <b id="my-balance-display">0</b> YDL</div>
+        </div>
+        <div id="bug-grid" class="selection-area"></div>
+        <div class="bet-panel">
+            <input type="number" id="bet-amount" value="100" min="1">
+            <button id="ready-btn" onclick="playerReady()">READY TO RACE</button>
+        </div>
+    </div>
+
+    <div id="race-screen" style="display:none;">
+        <div class="track">
+            <div class="lane"><div class="lane-mark"></div></div>
+            <div class="lane"><div class="lane-mark"></div></div>
+            <div class="lane"><div class="lane-mark"></div></div>
+            <div class="lane"><div class="lane-mark"></div></div>
+            <div class="lane"><div class="lane-mark"></div></div>
+            <div class="lane"><div class="lane-mark"></div></div>
+        </div>
+    </div>
+
+    <div id="winner-screen" style="display:none;">
+        <h1 class="win-title">CHAMPION</h1>
+        <img id="win-img" src="" style="width:150px;">
+        <h2 id="win-name"></h2>
+        <p id="profit-info"></p>
+        <button class="d-btn" onclick="location.reload()">BACK TO MENU</button>
     </div>
 
     <script src="script.js"></script>
