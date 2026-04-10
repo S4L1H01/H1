@@ -38,18 +38,16 @@ window.selectBug = (n) => {
 };
 
 function launchRace() {
-    if(!selectedBug) return alert("Önce aracını seçmelisin!");
+    if(!selectedBug) return alert("Aracını seç!");
     const bet = parseFloat(document.getElementById('bet-amount').value);
-    
-    if(bet > myBalance) return alert("YDL Yetersiz!");
-    if(bet <= 0) return alert("Geçerli bir bahis gir!");
+    if(bet > myBalance || bet <= 0) return alert("Geçersiz bakiye!");
 
     myBalance -= bet;
     localStorage.setItem('h1_balance', myBalance);
     
     const audio = document.getElementById('race-sound');
-    audio.volume = 0.2; // Ses seviyesi kısıldı
-    audio.play().catch(e => console.log("Ses çalınamadı:", e));
+    audio.volume = 0.2;
+    audio.play();
 
     runRaceEngine(bet);
 }
@@ -60,42 +58,41 @@ function runRaceEngine(bet) {
     lanes.forEach(l => l.innerHTML = ''); 
     
     let results = [];
-    const CHEAT_CODES = [8731, 4431]; // Gizli Bahis Kodları [cite: 2026-04-10]
+    const CHEAT_CODES = [8731, 4431]; 
 
     ALL_BUGS.forEach((bug) => {
         let time;
+        // Heyecan faktörü: Rastgele ek süreler (Sona yaklaşınca yavaşlama hissi için) [cite: 2026-04-10]
+        const chaos = Math.random() * 1.5;
 
-        // 1. Durum: RED ROACH Her Zaman Kaybeder (Hile kodları olsa bile) [cite: 2026-04-10]
         if(bug.name === "RED ROACH") {
-            time = (Math.random() * 2 + 13.5).toFixed(3); // En yavaş
+            time = (9.5 + chaos + 2.0).toFixed(3); // Hep 11 sn üstü ama yakından kaybediyor [cite: 2026-04-10]
         } 
-        // 2. Durum: Hile kodlarından biri basıldıysa ve Red Roach değilse kazandır [cite: 2026-04-10]
         else if(CHEAT_CODES.includes(bet) && bug.name === selectedBug) {
-            time = (Math.random() * 0.2 + 6.2).toFixed(3); // En hızlı
+            time = (8.0 + (Math.random() * 0.3)).toFixed(3); // Hileli araç garantili ama heyecanlı süre
         }
-        // 3. Durum: Normal Yarışçılar
         else {
-            time = (Math.random() * 4 + 7.8).toFixed(3); // Normal hız
+            time = (8.5 + chaos).toFixed(3); // Normal araçlar
         }
-        
         results.push({ name: bug.name, img: bug.img, time: parseFloat(time) });
     });
 
-    // Animasyonu Başlat (Aşağıdan Yukarı) [cite: 2026-04-10]
+    // Araçları Pistte Yürüt
     results.forEach((racer, i) => {
         const img = document.createElement('img');
         img.src = racer.img;
         img.className = 'cockroach';
         lanes[i].appendChild(img);
 
+        // Dinamik Hareket: Önce fırlar, sonra hafif yavaşlar, sonra bitirir [cite: 2026-04-10]
         setTimeout(() => {
-            img.style.transition = `bottom ${racer.time}s cubic-bezier(0.4, 0, 0.2, 1)`;
+            img.style.transition = `bottom ${racer.time}s cubic-bezier(0.2, 0.8, 0.4, 1)`;
             img.style.bottom = "120vh"; 
         }, 100);
     });
 
     const winner = [...results].sort((a, b) => a.time - b.time)[0];
-    const reward = bet * 4;
+    const reward = bet * 1.5; // Yeni Kazanç Çarpanı: 0.50 kat fazlası [cite: 2026-04-10]
 
     setTimeout(() => {
         const isUserWinner = (winner.name === selectedBug);
@@ -114,5 +111,5 @@ function displayResults(w, reward, isWin) {
     const status = document.getElementById('win-status');
     status.innerText = isWin ? "ŞAMPİYONSUN!" : "KAYBETTİN!";
     status.style.color = isWin ? "#00f3ff" : "#ff003c";
-    document.getElementById('profit-info').innerText = isWin ? `+${reward} YDL KAZANDIN` : "BAHİS PATLADI";
+    document.getElementById('profit-info').innerText = isWin ? `+${reward.toFixed(0)} YDL KAZANDIN` : "YDL GİTTİ";
 }
