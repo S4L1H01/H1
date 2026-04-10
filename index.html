@@ -4,143 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>H1 — HAMAM YARIŞI</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+    <audio id="race-sound" src="h1ses.mp3" preload="auto"></audio>
 
-<!-- MAIN MENU -->
-<div id="main-menu" class="screen active">
-    <div class="scanlines"></div>
-    <div class="noise-overlay"></div>
-    <div class="menu-glow-orb red"></div>
-    <div class="menu-glow-orb blue right"></div>
-    <div class="menu-inner">
-        <div class="logo-block">
-            <div class="logo-pre">HAMAM</div>
-            <div class="logo-h1">H1</div>
-            <div class="logo-sub">UNDERGROUND RACE CIRCUIT</div>
-            <div class="logo-line"></div>
-        </div>
-        <div class="menu-btns">
-            <button class="glow-btn primary" onclick="startSinglePlayer()">
-                <span class="btn-icon">◈</span>
-                <span class="btn-body">
-                    <span class="btn-text">TEK OYUNCULU</span>
-                    <span class="btn-sub">Sen + 3 BOT</span>
-                </span>
-            </button>
-            <button class="glow-btn secondary" onclick="showMultiplayerMenu()">
-                <span class="btn-icon">◉</span>
-                <span class="btn-body">
-                    <span class="btn-text">ÇOK OYUNCULU</span>
-                    <span class="btn-sub">Online · Gerçek Rakipler</span>
-                </span>
-            </button>
-        </div>
-        <div class="balance-hud">
-            <div class="hud-label">BAKİYE</div>
-            <div class="hud-val"><span id="menu-balance">10,000</span> <span class="hud-currency">YDL</span></div>
+    <div id="main-menu" class="screen active">
+        <div class="overlay-fx"></div>
+        <div class="container">
+            <h1 class="logo">H1</h1>
+            <p class="tagline">UNDERGROUND RACE CIRCUIT</p>
+            <div class="menu-actions">
+                <button class="btn-primary" onclick="initSinglePlayer()">YARIŞA BAŞLA</button>
+                <div class="stat-box">BAKİYE: <span id="main-balance-val">10000</span> YDL</div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- MULTIPLAYER MENU -->
-<div id="multi-menu" class="screen">
-    <div class="scanlines"></div>
-    <div class="noise-overlay"></div>
-    <button class="back-btn" onclick="showMainMenu()">← GERİ</button>
-    <div class="menu-inner">
-        <div class="section-title">ONLINE MODU</div>
-        <div class="multi-grid">
-            <div class="multi-card" id="create-lobby-card" onclick="createLobby(this)">
-                <div class="mc-icon">⊕</div>
-                <div class="mc-title">LOBİ OLUŞTUR</div>
-                <div class="mc-desc">4 haneli kod al, arkadaşını davet et</div>
-                <div class="mc-arrow">→</div>
-            </div>
-            <div class="multi-card">
-                <div class="mc-icon">⊞</div>
-                <div class="mc-title">LOBİYE KATIL</div>
-                <div class="mc-desc">Kodunu gir, yarışa gir</div>
-                <div class="join-row">
-                    <input type="number" id="lobby-input" placeholder="0000" maxlength="4">
-                    <button class="glow-btn small" onclick="joinLobby()">GİT</button>
+    <div id="garage-screen" class="screen">
+        <div class="header-bar">
+            <div class="balance-pill">CÜZDAN: <span id="garage-balance-val">10000</span> YDL</div>
+        </div>
+        <div class="selection-container">
+            <h2 class="title-flicker">ARACINI SEÇ</h2>
+            <div id="vehicle-grid" class="vehicle-grid"></div>
+            
+            <div class="bet-input-wrap">
+                <div class="input-group">
+                    <label>YATIRILACAK BAHİS (YDL)</label>
+                    <input type="number" id="bet-field" value="500" min="100" step="100">
                 </div>
+                <button id="start-btn" class="btn-launch" onclick="launchSequence()">GAZA BAS!</button>
             </div>
         </div>
-        <div id="multi-error" class="multi-error" style="display:none"></div>
     </div>
-<div id="lobby-screen" class="screen">
-    <div class="scanlines"></div>
-    <div class="lobby-topbar">
-        <button class="back-btn" onclick="showMainMenu()">← GERİ</button>
-        <div id="room-badge" class="room-badge hidden">
-            KOD: <strong id="room-code-display">—</strong>
-        </div>
-        <div class="hud-val small"><span id="my-balance-display">0</span> <span class="hud-currency">YDL</span></div>
-    </div>
-    <div class="lobby-body">
-        <div class="section-title">ARAÇ SEÇ <span class="section-hint" id="selection-hint"></span></div>
-        <div id="bug-grid" class="bug-grid"></div>
-        <div class="bet-area" id="bet-area">
-            <div class="bet-row">
-                <button class="bet-adj" onclick="adjustBet(-500)">−500</button>
-                <div class="bet-field">
-                    <div class="bet-label">BAHİS</div>
-                    <input type="number" id="bet-amount" value="500" min="100">
-                    <div class="bet-currency">YDL</div>
-                </div>
-                <button class="bet-adj" onclick="adjustBet(500)">+500</button>
+
+    <div id="race-track-screen" class="screen">
+        <div class="track-environment">
+            <div class="track-lanes" id="lanes-container">
+                <div class="lane"></div><div class="lane"></div><div class="lane"></div>
+                <div class="lane"></div><div class="lane"></div><div class="lane"></div>
             </div>
-            <button id="ready-btn" class="glow-btn primary large" onclick="playerReady()">HAZIRIM</button>
         </div>
     </div>
-    <div id="waiting-overlay" class="waiting-overlay hidden">
-        <div class="waiting-inner">
-            <div class="waiting-icon">◉</div>
-            <div class="waiting-title">BEKLENİYOR</div>
-            <div id="waiting-sub" class="waiting-sub">Diğer oyuncular bağlanıyor...</div>
+
+    <div id="result-screen" class="screen">
+        <div class="result-box">
+            <h1 id="race-outcome">SONUÇ</h1>
+            <div class="winner-display">
+                <img id="winner-image" src="" alt="Champion">
+                <h2 id="winner-car-name">---</h2>
+            </div>
+            <p id="payout-info"></p>
+            <button class="btn-reset" onclick="resetToMenu()">MENÜYE DÖN</button>
         </div>
     </div>
-</div>
 
-<!-- RACE SCREEN -->
-<div id="race-screen" class="screen">
-    <div id="countdown-overlay" class="countdown-overlay hidden">
-        <div id="countdown-num" class="countdown-num">3</div>
-    </div>
-    <div class="race-hud">
-        <div class="race-title-small">H1 YARIŞI</div>
-        <div id="race-bet-info" class="race-bet-info"></div>
-    </div>
-    <div id="track-container" class="track-container">
-        <div id="track-scroll" class="track-scroll"></div>
-        <div id="racers-layer" class="racers-layer"></div>
-        <div id="finish-banner" class="finish-banner hidden">BİTİŞ ◇</div>
-    </div>
-    <div id="live-positions" class="live-positions"></div>
-</div>
-
-<!-- WINNER SCREEN -->
-<div id="winner-screen" class="screen">
-    <div class="scanlines"></div>
-    <div class="noise-overlay"></div>
-    <div class="winner-rays"></div>
-    <div class="winner-inner">
-        <div class="podium-label" id="win-status">ŞAMPİYON</div>
-        <div class="winner-showcase">
-            <div class="winner-glow-ring"></div>
-            <img id="win-img" src="" alt="">
-        </div>
-        <div id="win-name" class="win-name"></div>
-        <div id="profit-info" class="profit-chip"></div>
-        <button class="glow-btn primary large" onclick="location.reload()">↺ TEKRAR OYNA</button>
-    </div>
-</div>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
