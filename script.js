@@ -36,7 +36,7 @@ window.selectBug = (n) => { selectedBug = n; renderBugs(); };
 
 function launchRace() {
     const bet = parseFloat(document.getElementById('bet-amount').value);
-    if(!selectedBug || bet > myBalance || bet <= 0) return alert("Seçim veya Bakiye hatası!");
+    if(!selectedBug || bet > myBalance || bet <= 0) return alert("Seçim veya Bakiye geçersiz!");
 
     myBalance -= bet;
     localStorage.setItem('h1_balance', myBalance);
@@ -52,17 +52,21 @@ function runRaceEngine(bet) {
     lanes.forEach(l => l.innerHTML = ''); 
     
     const CHEAT_CODES = [8731, 4431];
-    let racers = ALL_BUGS.map((bug, i) => ({
-        ...bug,
-        pos: -10, // Başlangıç pozisyonu (pist altı)
-        speed: 0,
-        accel: Math.random() * 0.05 + 0.02, // İvmelenme
-        finished: false,
-        element: null,
-        isHacked: (CHEAT_CODES.includes(bet) && bug.name === selectedBug)
-    }));
+    let racers = ALL_BUGS.map((bug, i) => {
+        // Her araç için nadir bir "şanssızlık" ihtimali (Baya nadir) [cite: 2026-04-10]
+        const hasBadLuck = Math.random() < 0.08; 
+        
+        return {
+            ...bug,
+            pos: -10,
+            speed: 0.4 + (Math.random() * 0.3),
+            finished: false,
+            element: null,
+            badLuckZone: hasBadLuck ? (40 + Math.random() * 30) : null,
+            isHacked: (CHEAT_CODES.includes(bet) && bug.name === selectedBug)
+        };
+    });
 
-    // Araçları oluştur
     racers.forEach((r, i) => {
         const img = document.createElement('img');
         img.src = r.img;
@@ -72,36 +76,32 @@ function runRaceEngine(bet) {
         r.element = img;
     });
 
-    // Yarış Döngüsü (Her 30ms'de bir fizik hesapla) [cite: 2026-04-10]
     const raceInterval = setInterval(() => {
         let allFinished = true;
 
         racers.forEach(r => {
-            if (r.pos < 110) {
+            if (r.pos < 115) {
                 allFinished = false;
 
-                // FİZİK HESAPLAMA [cite: 2026-04-10]
-                // 1. Rastgele "Yalpalanma" (Gerçekçilik için hız dalgalanması)
-                let noise = (Math.random() - 0.5) * 0.1;
-                
-                // 2. Red Roach Sabotajı: Bitişe yaklaşınca hızı kes [cite: 2026-04-10]
-                if (r.name === "RED ROACH" && r.pos > 90) {
-                    r.speed *= 0.85; // %15 yavaşlama her karede
-                    r.accel = 0.001;
-                } else {
-                    r.speed += r.accel + noise;
+                // NORMAL HIZLANMA [cite: 2026-04-10]
+                let currentStep = r.speed;
+
+                // NADİR OLAY: Motor Teklemesi
+                if (r.badLuckZone && r.pos > r.badLuckZone && r.pos < r.badLuckZone + 10) {
+                    currentStep *= 0.3; // Sadece o bölgede yavaşlar
                 }
 
-                // 3. Hile Kodu: Sona doğru inanılmaz ivme [cite: 2026-04-10]
-                if (r.isHacked && r.pos > 60) {
-                    r.speed += 0.08;
+                // RED ROACH SABOTAJI: Sona gelince nefesi kesilir [cite: 2026-04-10]
+                if (r.name === "RED ROACH" && r.pos > 92) {
+                    currentStep *= 0.15;
                 }
 
-                // Hız sınırı (Kontrolden çıkmasınlar)
-                if (r.speed > 1.2) r.speed = 1.2;
-                if (r.speed < 0.1) r.speed = 0.1;
+                // HİLE KODU: Sona doğru atağa kalk
+                if (r.isHacked && r.pos > 70) {
+                    currentStep *= 2.5;
+                }
 
-                r.pos += r.speed;
+                r.pos += currentStep;
                 r.element.style.bottom = r.pos + "%";
             } else if (!r.finished) {
                 r.finished = true;
@@ -111,20 +111,16 @@ function runRaceEngine(bet) {
 
         if (allFinished) {
             clearInterval(raceInterval);
-            finishRace(racers, bet);
+            const winner = racers.sort((a, b) => a.finishTime - b.finishTime)[0];
+            const reward = bet * 1.5;
+
+            setTimeout(() => {
+                const isWin = (winner.name === selectedBug);
+                if(isWin) { myBalance += reward; localStorage.setItem('h1_balance', myBalance); }
+                displayResults(winner, reward, isWin);
+            }, 600);
         }
-    }, 30);
-}
-
-function finishRace(racers, bet) {
-    const winner = racers.sort((a, b) => a.finishTime - b.finishTime)[0];
-    const reward = bet * 1.5; // Bahis + 0.50 kazanç [cite: 2026-04-10]
-
-    setTimeout(() => {
-        const isWin = (winner.name === selectedBug);
-        if(isWin) { myBalance += reward; localStorage.setItem('h1_balance', myBalance); }
-        displayResults(winner, reward, isWin);
-    }, 500);
+    }, 40);
 }
 
 function displayResults(w, reward, isWin) {
