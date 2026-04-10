@@ -2,49 +2,57 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>H1 - Cockroach Racing</title>
+    <title>H1 - Hamam Yarışı</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div id="start-screen" class="dilbozun-ui">
-        <h1>H1</h1>
-        <p>WASTE YOUR YDL ON THE TRACK</p>
-        <div class="main-btns">
-            <input type="text" id="lobby-input" placeholder="ROOM CODE" maxlength="5">
-            <button class="d-btn" onclick="joinOrCreateLobby()">ENTER THE PIT</button>
+    <div id="main-menu" class="screen active">
+        <h1 class="logo">H1</h1>
+        <div class="menu-btns">
+            <button class="glow-btn" onclick="startSinglePlayer()">TEK OYUNCULU</button>
+            <button class="glow-btn" onclick="showMultiplayerMenu()">ÇOK OYUNCULU</button>
         </div>
     </div>
 
-    <div id="lobby-screen" style="display:none;">
-        <div class="room-header">
-            <div class="room-code">ROOM: <span id="room-code-display">----</span></div>
-            <div class="balance-info">BALANCE: <b id="my-balance-display">0</b> YDL</div>
-        </div>
-        <div id="bug-grid" class="selection-area"></div>
-        <div class="bet-panel">
-            <input type="number" id="bet-amount" value="100" min="1">
-            <button id="ready-btn" onclick="playerReady()">READY TO RACE</button>
+    <div id="multi-menu" class="screen">
+        <button class="back-btn" onclick="showMainMenu()">← GERİ</button>
+        <div class="menu-btns">
+            <button class="glow-btn" onclick="createLobby()">LOBİ OLUŞTUR</button>
+            <div class="join-area">
+                <input type="number" id="lobby-input" placeholder="4 HANELİ KOD" maxlength="4">
+                <button class="glow-btn" onclick="joinLobby()">KATIL</button>
+            </div>
         </div>
     </div>
 
-    <div id="race-screen" style="display:none;">
+    <div id="lobby-screen" class="screen">
+        <div class="header">
+            <div id="room-info">KOD: <span id="room-code-display">0000</span></div>
+            <div class="balance">BAKİYE: <span id="my-balance-display">0</span> YDL</div>
+        </div>
+        <div id="bug-grid" class="selection-grid"></div>
+        <div class="bet-section">
+            <input type="number" id="bet-amount" value="500">
+            <button id="ready-btn" class="glow-btn" onclick="playerReady()">HAZIRIM</button>
+        </div>
+    </div>
+
+    <div id="race-screen" class="screen">
         <div class="track">
-            <div class="lane"><div class="lane-mark"></div></div>
-            <div class="lane"><div class="lane-mark"></div></div>
-            <div class="lane"><div class="lane-mark"></div></div>
-            <div class="lane"><div class="lane-mark"></div></div>
-            <div class="lane"><div class="lane-mark"></div></div>
-            <div class="lane"><div class="lane-mark"></div></div>
+            <div class="lane"></div><div class="lane"></div><div class="lane"></div>
+            <div class="lane"></div><div class="lane"></div><div class="lane"></div>
         </div>
     </div>
 
-    <div id="winner-screen" style="display:none;">
-        <h1 class="win-title">CHAMPION</h1>
-        <img id="win-img" src="" style="width:150px;">
-        <h2 id="win-name"></h2>
+    <div id="winner-screen" class="screen">
+        <h1 id="win-status">ŞAMPİYON</h1>
+        <div class="winner-card">
+            <img id="win-img" src="">
+            <h2 id="win-name"></h2>
+        </div>
         <p id="profit-info"></p>
-        <button class="d-btn" onclick="location.reload()">BACK TO MENU</button>
+        <button class="glow-btn" onclick="location.reload()">MENÜYE DÖN</button>
     </div>
 
     <script src="script.js"></script>
