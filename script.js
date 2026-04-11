@@ -1,4 +1,4 @@
-// [cite: 2026-04-10]
+// [cite: 2026-04-11]
 const ALL_BUGS = [
     { name: "MERRARI", img: "Merrari.png" },
     { name: "MASTON KARTIN", img: "MastonKartin.png" },
@@ -8,12 +8,17 @@ const ALL_BUGS = [
     { name: "MILLYIMS", img: "Millyıms.png" }
 ];
 
-let myBalance = parseFloat(localStorage.getItem('h1_balance')) || 10000;
+let myBalance = Math.floor(parseFloat(localStorage.getItem('h1_balance'))) || 10000;
 let selectedBug = null;
-let raceInterval = null;
 
-// UI Güncelleme
-document.getElementById('main-balance').innerText = myBalance.toFixed(0);
+updateUI();
+
+function updateUI() {
+    ['main-balance', 'my-balance-display'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.innerText = Math.floor(myBalance);
+    });
+}
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -22,7 +27,7 @@ function showScreen(id) {
 
 function startSinglePlayer() {
     showScreen('lobby-screen');
-    document.getElementById('my-balance-display').innerText = myBalance.toFixed(0);
+    updateUI();
     renderBugs();
 }
 
@@ -34,101 +39,82 @@ function renderBugs() {
         </div>`).join('');
 }
 
-window.selectBug = (n) => {
-    selectedBug = n;
-    renderBugs();
-};
+window.selectBug = (n) => { selectedBug = n; renderBugs(); };
 
 function launchRace() {
-    if(!selectedBug) return alert("Aracını seç!");
-    const bet = parseFloat(document.getElementById('bet-amount').value);
+    const betInput = document.getElementById('bet-amount');
+    const val = betInput.value.trim();
+
+    // PARA HİLESİ [cite: 2026-04-11]
+    if(val === "banaparaverlavuk") {
+        myBalance += 31000;
+        localStorage.setItem('h1_balance', myBalance);
+        updateUI();
+        alert("31.000 YDL Hesaba Yüklendi!");
+        betInput.value = "500";
+        return;
+    }
+
+    const bet = Math.floor(parseFloat(val));
     
-    if(bet > myBalance) return alert("YDL Yetersiz!");
-    if(bet <= 0) return alert("Geçerli bir bahis gir!");
+    if(!selectedBug) return alert("ARACINI SEÇ!");
+    if(bet > Math.floor(myBalance)) return alert("YETERSİZ BAKİYE!");
+    if(bet <= 0 || isNaN(bet)) return alert("GEÇERLİ BİR BAHİS GİR!");
 
     myBalance -= bet;
     localStorage.setItem('h1_balance', myBalance);
+    updateUI();
     
-    const audio = document.getElementById('race-sound');
-    audio.volume = 0.3; // Ses seviyesi %30'a kısıldı
-    audio.play().catch(e => console.log("Ses çalınamadı:", e));
+    document.getElementById('race-sound').volume = 0.2;
+    document.getElementById('race-sound').play().catch(() => {});
 
-    startRace(bet);
+    runRaceEngine(bet);
 }
 
-function startRace(bet) {
+function runRaceEngine(bet) {
     showScreen('race-screen');
-    const track = document.getElementById('race-track');
-    const lanes = track.querySelectorAll('.lane');
-    lanes.forEach(lane => lane.innerHTML = ''); // Temizle
-
+    const lanes = document.querySelectorAll('.lane');
+    lanes.forEach(l => l.innerHTML = ''); 
+    
     const CHEAT_CODES = [8731, 4431];
-    let racers = [];
-
-    // FİZİK HESABI VE NADİR OLAY KONTROLÜ [cite: 2026-04-10]
-    // Sadece çok düşük bir ihtimalle rastgele bir araçta şanssızlık olsun
-    const luckRoll = Math.random();
-    let badLuckRacerId = -1; // -1 = kimse şanssız değil
-    if (luckRoll < 0.08) { // %8 ihtimalle bir araç şanssız (baya nadir)
-        badLuckRacerId = Math.floor(Math.random() * ALL_BUGS.length);
-    }
-
-    ALL_BUGS.forEach((bug, i) => {
-        const img = document.createElement('img');
-        img.src = bug.img;
-        img.className = 'cockroach';
-        lanes[i].appendChild(img);
-
-        // İvme (0.1 - 0.25 arası) ve Maksimum Hız (0.8 - 1.3 arası) rastgele
-        // Red Roach ivmesini düşük tut, son metrelerde çakılsın [cite: 2026-04-10]
-        const isRedRoach = bug.name === "RED ROACH";
-        
-        racers.push({
-            name: bug.name,
-            img: bug.img,
-            id: i,
-            element: img,
-            pos: -10, // Pistin altı (Yarış buradan başlar)
-            speed: 0,
-            accel: isRedRoach ? (0.05 + Math.random() * 0.05) : (0.12 + Math.random() * 0.13), // Red Roach yavaş hızlanır [cite: 2026-04-10]
-            maxSpeed: 0.85 + Math.random() * 0.45,
-            stumbles: (i === badLuckRacerId), // Sadece bu araç şanssızsa tökezlesin
-            isHacked: (CHEAT_CODES.includes(bet) && bug.name === selectedBug),
-            finished: false
-        });
+    let racers = ALL_BUGS.map((bug) => {
+        return {
+            ...bug,
+            pos: -5,
+            speed: 0.7 + (Math.random() * 0.45),
+            finished: false,
+            element: null,
+            isHacked: (CHEAT_CODES.includes(bet) && bug.name === selectedBug)
+        };
     });
 
-    // FİZİK MOTORU DÖNGÜSÜ (Her 30ms'de bir fizik hesapla) [cite: 2026-04-10]
-    if (raceInterval) clearInterval(raceInterval);
-    
-    raceInterval = setInterval(() => {
+    racers.forEach((r, i) => {
+        const img = document.createElement('img');
+        img.src = r.img;
+        img.className = 'cockroach';
+        img.style.bottom = r.pos + "%";
+        lanes[i].appendChild(img);
+        r.element = img;
+    });
+
+    const raceInterval = setInterval(() => {
         let allFinished = true;
 
         racers.forEach(r => {
-            if (r.pos < 110) {
+            if (r.pos < 105) {
                 allFinished = false;
-                
-                // Fiziksel İvmelenme [cite: 2026-04-10]
-                r.speed += r.accel;
-                
-                // RED ROACH SABOTAJI: Son Metrelerde Yavaşlatma [cite: 2026-04-10]
-                if (r.name === "RED ROACH" && r.pos > 90) { // %90'ı geçince motor durur [cite: 2026-04-10]
-                    r.speed *= 0.8; // Her karede hız %20 azalır [cite: 2026-04-10]
-                    if (r.speed < 0.1) r.speed = 0.1; // Çok az ilerlesin
-                } else if (r.stumbles && r.pos > 30 && r.pos < 60) { // NADİR OLAY [cite: 2026-04-10]
-                    r.speed *= 0.3; // Tökezleyen araç hızı %70 azalır
-                } else {
-                    // Hile Kodu İvmesi (Maks hıza takılma, sona doğru atağa kalk)
-                    if (r.isHacked && r.pos > 60) {
-                        r.speed += 0.05; // Hızına ek hız ekle
-                    }
-                    
-                    // Maksimum Hız Sınırı
-                    if (r.speed > r.maxSpeed) r.speed = r.maxSpeed;
-                }
+                let step = r.speed;
 
-                // Pozisyonu güncelle (Sürtünme yok, ivmeli hareket) [cite: 2026-04-10]
-                r.pos += r.speed;
+                // Red Bull Sabotajı (Son Metreler)
+                if (r.name === "RED ROACH" && r.pos > 89) step *= 0.12; 
+
+                // Hile Kodları (Atak)
+                if (r.isHacked && r.pos > 65) step *= 2.2;
+
+                // Rastgelelik
+                step += (Math.random() - 0.5) * 0.05;
+
+                r.pos += step;
                 r.element.style.bottom = r.pos + "%";
             } else if (!r.finished) {
                 r.finished = true;
@@ -136,53 +122,52 @@ function startRace(bet) {
             }
         });
 
-        // Tüm araçlar çizgiyi geçtiği an beklemeden bitir [cite: 2026-04-10]
         if (allFinished) {
             clearInterval(raceInterval);
             const winner = racers.sort((a, b) => a.finishTime - b.finishTime)[0];
-            const winReward = bet * 1.5; // Kazanç çarpanı (0.50 kat) [cite: 2026-04-10]
+            const reward = Math.floor(bet * 1.5);
 
             setTimeout(() => {
                 const isWin = (winner.name === selectedBug);
-                if(isWin) {
-                    myBalance += winReward;
+                if(isWin) { 
+                    myBalance += reward; 
                     localStorage.setItem('h1_balance', myBalance);
                 }
-                showWinnerUI(winner, winReward, isWin);
-            }, 300); // 300ms gecikme ile sonuç ekranına geç (Bekleme süresi yok) [cite: 2026-04-10]
+                updateUI();
+                displayResults(winner, reward, isWin);
+            }, 400);
         }
-    }, 30);
+    }, 35);
 }
 
-function showWinnerUI(w, profit, isWin) {
+function displayResults(w, reward, isWin) {
     showScreen('winner-screen');
     document.getElementById('win-img').src = w.img;
     document.getElementById('win-name').innerText = w.name;
-    document.getElementById('win-status').innerText = isWin ? "ŞAMPİYONSUN" : "KAYBETTİN";
-    document.getElementById('win-status').style.color = isWin ? "var(--neon-blue)" : "var(--neon-red)";
-    document.getElementById('profit-info').innerText = isWin ? `+${profit.toFixed(0)} YDL KAZANDIN` : `YDL GİTTİ...`;
-
-    // FAKİR MODU KONTROLÜ [cite: 2026-04-10]
-    // Eğer kazandıktan sonra bakiye 0'a eşitse tetikle [cite: 2026-04-10]
-    if (myBalance.toFixed(0) === "0") {
-        setTimeout(playFakirVideo, 2000); // 2 saniye sonra video başlar [cite: 2026-04-10]
+    const status = document.getElementById('win-status');
+    status.innerText = isWin ? "ŞAMPİYONSUN!" : "KAYBETTİN!";
+    status.style.color = isWin ? "#00f3ff" : "#ff003c";
+    document.getElementById('profit-info').innerText = isWin ? `+${reward} YDL KAZANDIN` : "YDL GİTTİ";
+    
+    // Video Kontrolü
+    if (Math.floor(myBalance) <= 0) {
+        setTimeout(playFakirVideo, 1200);
     }
 }
 
 function playFakirVideo() {
     const overlay = document.getElementById('fakir-overlay');
     const video = document.getElementById('fakir-video');
-    
-    overlay.classList.remove('hidden'); // Videoyu göster
-    video.play(); // Videoyu oynat
+    overlay.style.display = 'flex';
+    video.muted = false;
+    video.play().catch(() => { video.muted = true; video.play(); });
 
-    // Video bittiğinde parayı ver ve sayfayı yenile [cite: 2026-04-10]
     video.onended = () => {
-        overlay.classList.add('hidden'); // Videoyu gizle
+        overlay.style.display = 'none';
         myBalance = 10000;
         localStorage.setItem('h1_balance', myBalance);
-        document.getElementById('main-balance').innerText = myBalance.toFixed(0);
-        alert("Sadakan yüklendi fakir: 10.000 YDL"); // [cite: 2026-04-10]
-        location.reload(); // [cite: 2026-04-10] Sayfayı yenileyerek sistemi resetle
+        updateUI();
+        alert("Sadakan yüklendi: 10.000 YDL");
+        location.reload();
     };
 }

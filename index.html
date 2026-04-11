@@ -5,33 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>H1 - Hamam Yarışı</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
     <audio id="race-sound" src="h1ses.mp3" preload="auto"></audio>
 
     <div id="main-menu" class="screen active">
         <h1 class="logo">H1</h1>
-        <div class="menu-btns">
-            <button class="glow-btn" onclick="startSinglePlayer()">YARIŞA BAŞLA</button>
-            <div class="balance-main">BAKİYE: <span id="main-balance">10000</span> YDL</div>
-        </div>
+        <div class="balance-display">BAKİYE: <span id="main-balance">0</span> YDL</div>
+        <br>
+        <button class="glow-btn" onclick="startSinglePlayer()">YARIŞA BAŞLA</button>
     </div>
 
     <div id="lobby-screen" class="screen">
-        <div class="header">
-            <div class="balance">BAKİYE: <span id="my-balance-display">10000</span> YDL</div>
-        </div>
-        <h2 class="sub-title">ARACINI SEÇ</h2>
+        <div class="balance-display">BAKİYE: <span id="my-balance-display">0</span> YDL</div>
         <div id="bug-grid" class="selection-grid"></div>
-        <div class="bet-section">
-            <input type="number" id="bet-amount" value="500" min="100">
-            <button id="ready-btn" class="glow-btn" onclick="launchRace()">GAZA BAS!</button>
-        </div>
+        <input type="text" id="bet-amount" placeholder="Bahis veya Kod" value="500">
+        <br>
+        <button class="glow-btn" onclick="launchRace()">BAHİSİ YATIR</button>
     </div>
 
     <div id="race-screen" class="screen">
         <div class="track-wrapper">
-            <div class="track" id="race-track">
+            <div class="track">
                 <div class="lane"></div><div class="lane"></div><div class="lane"></div>
                 <div class="lane"></div><div class="lane"></div><div class="lane"></div>
             </div>
@@ -39,19 +35,18 @@
     </div>
 
     <div id="winner-screen" class="screen">
-        <h1 id="win-status">ŞAMPİYONSUN</h1>
-        <div class="winner-card">
+        <h1 id="win-status">SONUÇ</h1>
+        <div class="bug-card">
             <img id="win-img" src="">
-            <h2 id="win-name"></h2>
+            <p id="win-name"></p>
         </div>
         <p id="profit-info"></p>
-        <button class="glow-btn" onclick="location.reload()">TEKRAR DENE</button>
+        <button class="glow-btn" onclick="location.reload()">MENÜYE DÖN</button>
     </div>
 
-    <div id="fakir-overlay" class="hidden">
-        <video id="fakir-video" preload="auto">
+    <div id="fakir-overlay">
+        <video id="fakir-video" playsinline>
             <source src="fakir.mp4" type="video/mp4">
-            Videonuz mp4 formatını desteklemiyor.
         </video>
     </div>
 
