@@ -31,7 +31,7 @@
 
     <div id="race-screen" class="screen">
         <div class="track-wrapper">
-            <div class="track">
+            <div class="track" id="race-track">
                 <div class="lane"></div><div class="lane"></div><div class="lane"></div>
                 <div class="lane"></div><div class="lane"></div><div class="lane"></div>
             </div>
@@ -39,13 +39,20 @@
     </div>
 
     <div id="winner-screen" class="screen">
-        <h1 id="win-status">ŞAMPİYON</h1>
+        <h1 id="win-status">ŞAMPİYONSUN</h1>
         <div class="winner-card">
             <img id="win-img" src="">
             <h2 id="win-name"></h2>
         </div>
         <p id="profit-info"></p>
         <button class="glow-btn" onclick="location.reload()">TEKRAR DENE</button>
+    </div>
+
+    <div id="fakir-overlay" class="hidden">
+        <video id="fakir-video" preload="auto">
+            <source src="fakir.mp4" type="video/mp4">
+            Videonuz mp4 formatını desteklemiyor.
+        </video>
     </div>
 
     <script src="script.js"></script>
