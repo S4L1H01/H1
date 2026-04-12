@@ -1,4 +1,4 @@
-// [cite: 2026-04-11]
+// [cite: 2026-04-12]
 const ALL_BUGS = [
     { name: "MERRARI", img: "Merrari.png" },
     { name: "MASTON KARTIN", img: "MastonKartin.png" },
@@ -45,21 +45,20 @@ function launchRace() {
     const betInput = document.getElementById('bet-amount');
     const val = betInput.value.trim();
 
-    // PARA HİLESİ [cite: 2026-04-11]
+    // Hile Kodu
     if(val === "banaparaverlavuk") {
         myBalance += 31000;
         localStorage.setItem('h1_balance', myBalance);
         updateUI();
-        alert("31.000 YDL Hesaba Yüklendi!");
+        alert("31.000 YDL Yüklendi!");
         betInput.value = "500";
         return;
     }
 
     const bet = Math.floor(parseFloat(val));
-    
     if(!selectedBug) return alert("ARACINI SEÇ!");
     if(bet > Math.floor(myBalance)) return alert("YETERSİZ BAKİYE!");
-    if(bet <= 0 || isNaN(bet)) return alert("GEÇERLİ BİR BAHİS GİR!");
+    if(bet <= 0 || isNaN(bet)) return alert("BAHİS GİR!");
 
     myBalance -= bet;
     localStorage.setItem('h1_balance', myBalance);
@@ -81,7 +80,7 @@ function runRaceEngine(bet) {
         return {
             ...bug,
             pos: -5,
-            speed: 0.7 + (Math.random() * 0.45),
+            speed: 0.75 + (Math.random() * 0.4),
             finished: false,
             element: null,
             isHacked: (CHEAT_CODES.includes(bet) && bug.name === selectedBug)
@@ -105,14 +104,14 @@ function runRaceEngine(bet) {
                 allFinished = false;
                 let step = r.speed;
 
-                // Red Bull Sabotajı (Son Metreler)
-                if (r.name === "RED ROACH" && r.pos > 89) step *= 0.12; 
+                // Gizli Red Bull Sabotajı (Daha doğal) [cite: 2026-04-12]
+                if (r.name === "RED ROACH") {
+                    if(r.pos > 30 && r.pos < 50) step *= 1.3; // Önce atağa kalkıp umut verir
+                    if(r.pos > 92) step *= 0.1; // Son milimetrede nefesi kesilir
+                }
 
-                // Hile Kodları (Atak)
-                if (r.isHacked && r.pos > 65) step *= 2.2;
-
-                // Rastgelelik
-                step += (Math.random() - 0.5) * 0.05;
+                if (r.isHacked && r.pos > 60) step *= 2.3;
+                step += (Math.random() - 0.5) * 0.06;
 
                 r.pos += step;
                 r.element.style.bottom = r.pos + "%";
@@ -149,18 +148,30 @@ function displayResults(w, reward, isWin) {
     status.style.color = isWin ? "#00f3ff" : "#ff003c";
     document.getElementById('profit-info').innerText = isWin ? `+${reward} YDL KAZANDIN` : "YDL GİTTİ";
     
-    // Video Kontrolü
+    // Video Garanti Mekanizması [cite: 2026-04-12]
     if (Math.floor(myBalance) <= 0) {
-        setTimeout(playFakirVideo, 1200);
+        console.log("Para bitti, video hazırlanıyor...");
+        setTimeout(playFakirVideo, 1000);
     }
 }
 
 function playFakirVideo() {
     const overlay = document.getElementById('fakir-overlay');
     const video = document.getElementById('fakir-video');
+    
     overlay.style.display = 'flex';
+    video.currentTime = 0; // Videoyu başa sar
     video.muted = false;
-    video.play().catch(() => { video.muted = true; video.play(); });
+
+    // Videoyu zorla başlat
+    const playPromise = video.play();
+
+    if (playPromise !== undefined) {
+        playPromise.catch(() => {
+            video.muted = true; // Tarayıcı engellerse sessiz başlatıp devam et
+            video.play();
+        });
+    }
 
     video.onended = () => {
         overlay.style.display = 'none';

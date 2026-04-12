@@ -1,4 +1,4 @@
-/* [cite: 2026-04-11] */
+/* */
 :root { --neon-red: #ff003c; --neon-blue: #00f3ff; --dark: #050505; }
 body { margin:0; background: var(--dark); color:white; font-family: 'Share Tech Mono', monospace; overflow:hidden; touch-action: manipulation; }
 
