@@ -45,7 +45,6 @@ function launchRace() {
     const betInput = document.getElementById('bet-amount');
     const val = betInput.value.trim();
 
-    // Hile Kodu
     if(val === "banaparaverlavuk") {
         myBalance += 31000;
         localStorage.setItem('h1_balance', myBalance);
@@ -80,12 +79,23 @@ function runRaceEngine(bet) {
         return {
             ...bug,
             pos: -5,
-            speed: 0.75 + (Math.random() * 0.4),
+            // Normal araç hızları
+            speed: 0.8 + (Math.random() * 0.4),
             finished: false,
             element: null,
             isHacked: (CHEAT_CODES.includes(bet) && bug.name === selectedBug)
         };
     });
+
+    // RED BULL HEDEF HIZ HESABI [cite: 2026-04-12]
+    // En yavaş normal aracın hızını bul ve Red Bull'u ondan biraz daha yavaş yap
+    const normalSpeeds = racers.filter(r => r.name !== "RED ROACH").map(r => r.speed);
+    const slowestSpeed = Math.min(...normalSpeeds);
+    const redBullRacer = racers.find(r => r.name === "RED ROACH");
+    if(redBullRacer) {
+        // En yavaştan %15-20 daha yavaş, böylece sonda yavaşlamasına gerek kalmaz
+        redBullRacer.speed = slowestSpeed * 0.82; 
+    }
 
     racers.forEach((r, i) => {
         const img = document.createElement('img');
@@ -104,14 +114,11 @@ function runRaceEngine(bet) {
                 allFinished = false;
                 let step = r.speed;
 
-                // Gizli Red Bull Sabotajı (Daha doğal) [cite: 2026-04-12]
-                if (r.name === "RED ROACH") {
-                    if(r.pos > 30 && r.pos < 50) step *= 1.3; // Önce atağa kalkıp umut verir
-                    if(r.pos > 92) step *= 0.1; // Son milimetrede nefesi kesilir
-                }
-
-                if (r.isHacked && r.pos > 60) step *= 2.3;
-                step += (Math.random() - 0.5) * 0.06;
+                // Hile kodu atağı
+                if (r.isHacked && r.pos > 60) step *= 2.4;
+                
+                // Doğallık katmak için küçük sapmalar
+                step += (Math.random() - 0.5) * 0.04;
 
                 r.pos += step;
                 r.element.style.bottom = r.pos + "%";
@@ -148,10 +155,10 @@ function displayResults(w, reward, isWin) {
     status.style.color = isWin ? "#00f3ff" : "#ff003c";
     document.getElementById('profit-info').innerText = isWin ? `+${reward} YDL KAZANDIN` : "YDL GİTTİ";
     
-    // Video Garanti Mekanizması [cite: 2026-04-12]
+    // VİDEO TETİKLEYİCİ - KESİN ÇÖZÜM [cite: 2026-04-12]
     if (Math.floor(myBalance) <= 0) {
-        console.log("Para bitti, video hazırlanıyor...");
-        setTimeout(playFakirVideo, 1000);
+        console.log("BAKİYE SIFIR, VİDEO BAŞLIYOR");
+        playFakirVideo();
     }
 }
 
@@ -159,19 +166,20 @@ function playFakirVideo() {
     const overlay = document.getElementById('fakir-overlay');
     const video = document.getElementById('fakir-video');
     
+    // Her denemede videoyu sıfırla ve göster
     overlay.style.display = 'flex';
-    video.currentTime = 0; // Videoyu başa sar
-    video.muted = false;
-
-    // Videoyu zorla başlat
-    const playPromise = video.play();
-
-    if (playPromise !== undefined) {
-        playPromise.catch(() => {
-            video.muted = true; // Tarayıcı engellerse sessiz başlatıp devam et
+    video.currentTime = 0;
+    
+    const startPlay = () => {
+        video.play().catch(() => {
+            // Tarayıcı hala engelliyorsa sessizce başlatır
+            video.muted = true;
             video.play();
         });
-    }
+    };
+
+    // 1 saniye sonra başlat (UI geçişi tamamlansın)
+    setTimeout(startPlay, 1000);
 
     video.onended = () => {
         overlay.style.display = 'none';
